@@ -356,10 +356,14 @@ def _read_or_create_token(data_dir: Path) -> str:
     try:
         fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     except FileExistsError:
-        token = path.read_text(encoding="ascii").strip()
-        if len(token) < 40:
-            raise RuntimeError("Tractor's local search token is damaged") from None
-        return token
+        # A peer created the file a moment ago and may not have written
+        # it yet; an empty read inside that window is a race, not damage.
+        for _ in range(20):
+            token = path.read_text(encoding="ascii").strip()
+            if len(token) >= 40:
+                return token
+            time.sleep(0.025)
+        raise RuntimeError("Tractor's local search token is damaged") from None
     with os.fdopen(fd, "w", encoding="ascii") as stream:
         stream.write(token)
     return token
@@ -423,12 +427,25 @@ def _parent_alive(pid):
 
 def serve(data_dir: Path, parent_pid: int | None = None):
     token = _read_or_create_token(data_dir)
-    try:
-        server = SearchService(data_dir, token, parent_pid)
-    except OSError as exc:
-        if exc.errno in {errno.EADDRINUSE, 48, 10048} and _register_existing(data_dir, parent_pid):
-            return 0
-        raise RuntimeError("Tractor search could not bind its local service port") from None
+    # The port is shared by every Orc instance on this machine, and a
+    # previous instance's service can hold it briefly after its owner
+    # exits (its reaper polls every 2 s). A same-token sibling service
+    # is joined by registering; a foreign-token predecessor cannot be
+    # joined, only outlived. Either way a single bind attempt is not
+    # enough: retry until the deadline before declaring failure.
+    deadline = time.monotonic() + 30
+    while True:
+        try:
+            server = SearchService(data_dir, token, parent_pid)
+            break
+        except OSError as exc:
+            if exc.errno not in {errno.EADDRINUSE, 48, 10048}:
+                raise
+            if _register_existing(data_dir, parent_pid):
+                return 0
+            if time.monotonic() >= deadline:
+                raise RuntimeError("Tractor search could not bind its local service port") from None
+            time.sleep(0.25)
 
     pid_file = data_dir / "search-service.pid"
     _write_pid(pid_file)
