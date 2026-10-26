@@ -1,6 +1,6 @@
 # TRACTOR
 
-**Global Intelligence Search · v0.4**
+**Global Intelligence Search · v0.5**
 
 A native desktop application for evidence-led research across independent public sources. Enter one subject. The engine builds a query plan, retrieves successive result pages, follows traceable multilingual candidates, groups duplicate records, and saves the evidence and unfinished work on your device.
 
@@ -8,9 +8,9 @@ The launch screen has one wordmark and one search field. Results, source coverag
 
 ## Download and run
 
-Get a versioned native bundle or source archive from [GitHub Releases](https://github.com/chasebryan/tractor/releases). Native bundles include Python and dependencies: extract the complete archive and open Tractor. See [platform instructions and verification limits](docs/releases.md).
+Get a versioned native bundle or source archive from [GitHub Releases](https://github.com/nightwarelabz/tractor/releases). Native bundles include Python and dependencies: extract the complete archive and open Tractor. See [platform instructions and verification limits](docs/releases.md).
 
-For source installation, extract a release source archive and install **Python 3.11–3.13** (3.12 recommended). The original public APIs and Torch need no keys; the new premium search providers are optional.
+For source installation, extract a release source archive and install **Python 3.11–3.13** (3.12 recommended). DuckDuckGo, Wikimedia Commons, the original public APIs, and Torch need no keys; premium search providers are optional.
 
 **Linux and macOS:** open a terminal in the extracted folder and run:
 
@@ -27,7 +27,7 @@ On Fedora, install a supported interpreter with `sudo dnf install python3.12`. T
 To clone or update the development source:
 
 ```bash
-git clone https://github.com/chasebryan/tractor.git
+git clone https://github.com/nightwarelabz/tractor.git
 cd tractor
 sh run.sh
 ```
@@ -53,6 +53,8 @@ On Windows, activate with `.venv\Scripts\Activate.ps1`.
 4. Open **Coverage** to inspect attempts, provider errors, request/cache counts, languages, discovery passes, limits, and the queue of remaining searches.
 5. **Stop** cancels outstanding requests and saves collected evidence. **Continue** resumes the saved queue, including after closing and reopening the app. **Refresh** starts a separate investigation using fresh requests and preserves its predecessor in History.
 6. Search **History** by subject or collected source text. Reopen an investigation to review or continue it. **Export** writes full JSON, Markdown, or spreadsheet-safe CSV.
+
+Orc can launch Tractor's local browser search service as its default search engine. The service binds only to `127.0.0.1`, stores investigations in Tractor's local database, and returns recursive web and image results to its in-browser results page. Website pages open in Orc; Commons image results include attribution and license links. Search terms are sent to the enabled providers shown in Tractor coverage, including DuckDuckGo and Wikimedia Commons by default. Coverage depends on those providers and is not exhaustive.
 
 Results can be filtered by text, category, provider, language, domain, publication date, source region, observed entity type, and relevance, or sorted by relevance/newest/oldest. Unknown dates sort last. Partial publication dates remain partial; date filters use their possible range. Provider-reported source country is not treated as the subject's location.
 
@@ -194,6 +196,6 @@ python -m build
 
 Deterministic tests block live HTTP and exercise provider contracts, pagination, continuation, cancellation, provenance, ranking, deduplication, network boundaries, migrations, exports, and real Qt widgets. CI targets Python 3.11, 3.12, and 3.13 on Ubuntu, Windows and macOS, with dependency auditing and native smoke builds. Live-service checks are explicitly opt-in and separate.
 
-Version 0.4 completes the Coverage milestone. Claim/entity intelligence is planned for 0.5; full-document/PDF extraction, timelines, refresh diffs and large-scale persistence are planned for 0.6. Translation integration, additional government/forum sources and signed installers remain deferred. Current adapters retrieve API records and onion search-index snippets; they do not crawl arbitrary result pages. Future crawlers must enforce robots policies and bound document parsing resources.
+Version 0.5 adds the loopback browser search service, general web snippets, and image results. Claim/entity intelligence is planned for 0.6; full-document/PDF extraction, timelines, refresh diffs and large-scale persistence are planned for 0.7. Translation integration, additional government/forum sources and signed installers remain deferred. Current adapters retrieve API records and search-index snippets; they do not crawl arbitrary result pages. Future crawlers must enforce robots policies and bound document parsing resources.
 
 License: [AGPL-3.0](LICENSE).

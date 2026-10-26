@@ -12,7 +12,15 @@ from tractor.analysis.relationships import correlate
 from tractor.core.convergence import Budget
 from tractor.core.deduplication import DuplicateIndex, normalize_result
 from tractor.core.diversity import observation
-from tractor.core.models import Attempt, Edge, Investigation, QueryVariant, RetrievalTask, new_id, now
+from tractor.core.models import (
+    Attempt,
+    Edge,
+    Investigation,
+    QueryVariant,
+    RetrievalTask,
+    new_id,
+    now,
+)
 from tractor.core.provenance import record_discovery
 from tractor.core.query import add_variant, build_plan
 from tractor.core.scoring import rank_results

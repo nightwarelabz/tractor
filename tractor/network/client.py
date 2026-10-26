@@ -23,7 +23,6 @@ API_HOSTS = frozenset(
         "api.crossref.org",
         "archive.org",
         "commons.wikimedia.org",
-        "upload.wikimedia.org",
         "www.wikidata.org",
         "www.ebi.ac.uk",
         "api.gdeltproject.org",
@@ -195,8 +194,9 @@ class NetworkClient:
         self, url: str, params=None, *, interval=2.0, ttl=900, stats=None, provider=""
     ) -> str:
         """Read only registered public search-result pages, never destination websites."""
-        host = urlsplit(url).hostname or ""
-        if self.tor or host not in SEARCH_HTML_HOSTS:
+        parts = urlsplit(url)
+        host = parts.hostname or ""
+        if self.tor or host not in SEARCH_HTML_HOSTS or parts.path != "/html/":
             raise NetworkPolicyError(
                 "HTML search requests are restricted to registered search hosts."
             )

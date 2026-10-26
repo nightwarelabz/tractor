@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from pathlib import Path
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 from tractor.core.engine import InvestigationEngine
@@ -104,7 +104,8 @@ class SearchHandler(BaseHTTPRequestHandler):
         return True
 
     def _body(self):
-        if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
+        content_type = self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+        if content_type != "application/json":
             self._send(415, {"error": "JSON requests are required"})
             return None
         try:
@@ -160,7 +161,8 @@ class SearchHandler(BaseHTTPRequestHandler):
             return
         path = urlsplit(self.path).path
         if path == "/internal/register":
-            if self.client_address[0] != HOST or self.headers.get("X-Tractor-Token", "") != self.server.token:
+            token = self.headers.get("X-Tractor-Token", "")
+            if self.client_address[0] != HOST or token != self.server.token:
                 return self._send(403, {"error": "Registration rejected"})
             data = self._body()
             if data is None:
@@ -199,7 +201,11 @@ class SearchHandler(BaseHTTPRequestHandler):
             self.server.jobs[job_id] = job
             # Bound the in-memory job table while leaving current searches alone.
             completed = sorted(
-                (item for item in self.server.jobs.values() if item["status"] not in {"queued", "running"}),
+                (
+                    item
+                    for item in self.server.jobs.values()
+                    if item["status"] not in {"queued", "running"}
+                ),
                 key=lambda item: item["created_at"],
             )
             for stale in completed[:-40]:
@@ -335,18 +341,25 @@ async def _run_engine(data_dir, query, job_id, cancelled, on_event):
 def _read_or_create_token(data_dir: Path) -> str:
     data_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     path = data_dir / "search-service.token"
-    try:
-        token = path.read_text(encoding="ascii").strip()
+    for _ in range(20):
+        try:
+            token = path.read_text(encoding="ascii").strip()
+        except FileNotFoundError:
+            break
+        except OSError:
+            token = ""
         if len(token) >= 40:
             os.chmod(path, 0o600)
             return token
-    except OSError:
-        pass
+        time.sleep(0.025)
     token = secrets.token_urlsafe(48)
     try:
         fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     except FileExistsError:
-        return path.read_text(encoding="ascii").strip()
+        token = path.read_text(encoding="ascii").strip()
+        if len(token) < 40:
+            raise RuntimeError("Tractor's local search token is damaged") from None
+        return token
     with os.fdopen(fd, "w", encoding="ascii") as stream:
         stream.write(token)
     return token
@@ -412,7 +425,9 @@ def serve(data_dir: Path, parent_pid: int | None = None):
                 return
 
     if parent_pid:
-        threading.Thread(target=reap_closed_parents, name="tractor-owner-watch", daemon=True).start()
+        threading.Thread(
+            target=reap_closed_parents, name="tractor-owner-watch", daemon=True
+        ).start()
     try:
         server.serve_forever(poll_interval=0.25)
     finally:

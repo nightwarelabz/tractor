@@ -96,6 +96,9 @@ async function poll(jobId) {
       filters.hidden = latest.length === 0;
       const progress = data.providers ? `${data.providers} providers · ` : "";
       statusLine.textContent = data.error || `${progress}${data.status === "running" ? "Tractor is searching recursively…" : data.stop_reason || `${latest.length} results`}`;
+      if (!latest.length && !["running", "queued"].includes(data.status)) {
+        resultList.append(element("p", "empty", "No results were returned. Provider availability can vary; try another search."));
+      }
       if (data.status !== "running" && data.status !== "queued") {
         stopButton.hidden = true;
         return;
@@ -112,6 +115,11 @@ async function poll(jobId) {
 async function search(value) {
   const query = value.trim().slice(0, 500);
   if (!query) return;
+  if (activeJob) {
+    const previous = activeJob;
+    activeJob = "";
+    try { await api(`/api/jobs/${previous}`, { method: "DELETE" }); } catch {}
+  }
   queryInput.value = query;
   document.querySelector("#page-title").textContent = query;
   resultList.replaceChildren();

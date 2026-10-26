@@ -271,7 +271,7 @@ def main() -> int:
             return 0
     except KeyError:
         parser.exit(1, "No saved investigation has that ID. Use --history to list IDs.\n")
-    except (ValueError, OSError, sqlite3.Error) as exc:
+    except (ValueError, OSError, sqlite3.Error, RuntimeError) as exc:
         parser.exit(1, redact(f"Could not start: {exc}\n"))
     except KeyboardInterrupt:
         parser.exit(130, "Stopped. Collected evidence and remaining work are saved in History.\n")

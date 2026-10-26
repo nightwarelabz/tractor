@@ -77,7 +77,16 @@ class Settings:
             defaults = {a.id for a in default_adapters()}
             valid = (
                 defaults
-                | {"torch", "duckduckgo", "commons_images", "brave", "mojeek", "kagi", "marginalia", "common_crawl"}
+                | {
+                    "torch",
+                    "duckduckgo",
+                    "commons_images",
+                    "brave",
+                    "mojeek",
+                    "kagi",
+                    "marginalia",
+                    "common_crawl",
+                }
                 | ({"searxng"} if endpoint else set())
             )
             valid |= {"onion_searxng"} if onion else set()

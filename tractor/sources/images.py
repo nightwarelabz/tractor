@@ -53,8 +53,8 @@ class CommonsImages(SearchProvider):
                 thumbnail = original
             metadata = info.get("extmetadata", {})
 
-            def field(key):
-                value = metadata.get(key, {})
+            def field(key, extmetadata=metadata):
+                value = extmetadata.get(key, {})
                 return plain_text(value.get("value", ""))[:500] if isinstance(value, dict) else ""
 
             title = item.get("title", "Image")
