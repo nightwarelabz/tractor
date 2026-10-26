@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import secrets
+import socketserver
 import threading
 import time
 import urllib.error
@@ -55,6 +56,17 @@ class SearchService(ThreadingHTTPServer):
         self.owners_lock = threading.Lock()
         self.pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="tractor-search")
         super().__init__((HOST, PORT), SearchHandler)
+
+    def server_bind(self):
+        # http.server's server_bind reverse-resolves the host with
+        # socket.getfqdn() to name the server. On machines whose
+        # hostname does not resolve — many macOS systems — that lookup
+        # stalls service startup for minutes before the port is even
+        # bound. The service is loopback-only and never uses the name,
+        # so bind directly and record the literal address instead.
+        socketserver.TCPServer.server_bind(self)
+        self.server_name = HOST
+        self.server_port = PORT
 
 
 class SearchHandler(BaseHTTPRequestHandler):
