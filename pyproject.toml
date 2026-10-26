@@ -28,12 +28,6 @@ tractor = "tractor.app:main"
 [tool.hatch.build.targets.wheel]
 packages = ["tractor"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"tractor/assets/icon.svg" = "tractor/assets/icon.svg"
-"tractor/assets/icon-1024.png" = "tractor/assets/icon-1024.png"
-"tractor/assets/icon.ico" = "tractor/assets/icon.ico"
-"tractor/search_ui" = "tractor/search_ui"
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"

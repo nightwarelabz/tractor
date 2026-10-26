@@ -1,7 +1,7 @@
 """Build one native portable bundle on the target OS; never cross-compile."""
 
-import platform
 import os
+import platform
 import shutil
 import subprocess
 import sys
