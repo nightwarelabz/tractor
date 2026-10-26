@@ -47,4 +47,4 @@ jobs:
             echo "Release v$version already exists; immutable assets were left unchanged."
             exit 0
           fi
-          gh release create "v$version" --target "$GITHUB_SHA" --title "TRACTOR $version — Coverage" --notes-file docs/release-0.4.md dist/release/*
+          gh release create "v$version" --target "$GITHUB_SHA" --title "TRACTOR $version — Browser Search" --notes-file docs/release-0.5.md dist/release/*

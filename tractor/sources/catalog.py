@@ -6,11 +6,14 @@ from tractor.credentials import PROVIDER_ENV, Credentials
 from tractor.sources import default_adapters
 from tractor.sources.capabilities import capabilities
 from tractor.sources.common_crawl import CommonCrawl
+from tractor.sources.images import CommonsImages
 from tractor.sources.onion import OnionSearxNG, TorchSearch
 from tractor.sources.search import search_adapters
 from tractor.sources.web import SearxNG
 
 PROVIDER_IDS = tuple(a.id for a in default_adapters()) + (
+    "duckduckgo",
+    "commons_images",
     "brave",
     "mojeek",
     "kagi",
@@ -21,7 +24,17 @@ PROVIDER_IDS = tuple(a.id for a in default_adapters()) + (
     "onion_searxng",
 )
 PROFILES = {
-    "General": {"brave", "mojeek", "kagi", "marginalia", "searxng", "wikidata", "gdelt"},
+    "General": {
+        "duckduckgo",
+        "commons_images",
+        "brave",
+        "mojeek",
+        "kagi",
+        "marginalia",
+        "searxng",
+        "wikidata",
+        "gdelt",
+    },
     "Academic": {"crossref", "europe_pmc", "wikidata", "brave", "searxng"},
     "Historical": {"internet_archive", "common_crawl", "wikidata", "brave", "mojeek"},
     "Code": {"github", "brave", "mojeek", "searxng"},
@@ -34,6 +47,7 @@ def catalog(settings, base=None):
     credentials = Credentials()
     adapters = [
         *search_adapters(settings.search, credentials),
+        CommonsImages(settings.search, credentials),
         *(default_adapters() if base is None else base),
         CommonCrawl(settings.search),
         TorchSearch(),

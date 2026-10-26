@@ -15,12 +15,14 @@ from tractor.credentials import RequestAuth, redact, redact_bytes
 from tractor.network.throttling import RateLimiter
 from tractor.storage.cache import ResponseCache
 
-USER_AGENT = "TRACTOR/0.4 (+https://github.com/chasebryan/tractor; public research)"
+USER_AGENT = "TRACTOR/0.5 (+https://github.com/nightwarelabz/tractor; public research)"
+SEARCH_HTML_HOSTS = frozenset({"html.duckduckgo.com"})
 API_HOSTS = frozenset(
     {
         "api.github.com",
         "api.crossref.org",
         "archive.org",
+        "commons.wikimedia.org",
         "www.wikidata.org",
         "www.ebi.ac.uk",
         "api.gdeltproject.org",
@@ -29,6 +31,7 @@ API_HOSTS = frozenset(
         "kagi.com",
         "api2.marginalia-search.com",
         "index.commoncrawl.org",
+        *SEARCH_HTML_HOSTS,
     }
 )
 
@@ -60,6 +63,7 @@ class NetworkContext(Protocol):
 
     async def get_json(self, url: str, params=None, **kwargs) -> Any: ...
     async def get_text(self, url: str, params=None, **kwargs) -> str: ...
+    async def get_search_html(self, url: str, params=None, **kwargs) -> str: ...
 
 
 class NetworkClient:
@@ -183,6 +187,35 @@ class NetworkClient:
                 200,
                 content=raw,
                 headers={"content-type": headers.get("content-type", "text/plain")},
+            ).text
+        )
+
+    async def get_search_html(
+        self, url: str, params=None, *, interval=2.0, ttl=900, stats=None, provider=""
+    ) -> str:
+        """Read only registered public search-result pages, never destination websites."""
+        parts = urlsplit(url)
+        host = parts.hostname or ""
+        if self.tor or host not in SEARCH_HTML_HOSTS or parts.path != "/html/":
+            raise NetworkPolicyError(
+                "HTML search requests are restricted to registered search hosts."
+            )
+        raw, headers = await self._get(
+            url,
+            params,
+            interval=interval,
+            ttl=ttl,
+            stats=stats,
+            kind="search_html",
+            accepted={"text/html", "application/xhtml+xml"},
+            max_bytes=2 * 1024 * 1024,
+            provider=provider,
+        )
+        return redact(
+            httpx.Response(
+                200,
+                content=raw,
+                headers={"content-type": headers.get("content-type", "text/html")},
             ).text
         )
 

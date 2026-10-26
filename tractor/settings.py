@@ -55,13 +55,15 @@ def validate_onion_endpoint(value: str) -> str:
 @dataclass
 class Settings:
     sources: list[str] = field(
-        default_factory=lambda: [a.id for a in default_adapters()] + ["torch"]
+        default_factory=lambda: (
+            [a.id for a in default_adapters()] + ["duckduckgo", "commons_images", "torch"]
+        )
     )
     web_endpoint: str = ""
     tor_proxy: str = ""
     tor_autostart: bool = True
     onion_endpoint: str = ""
-    schema_version: int = 4
+    schema_version: int = 5
     search: SearchOptions = field(default_factory=SearchOptions)
     budget: Budget = field(default_factory=Budget)
     profile: str = "Custom"
@@ -76,7 +78,16 @@ class Settings:
             defaults = {a.id for a in default_adapters()}
             valid = (
                 defaults
-                | {"torch", "brave", "mojeek", "kagi", "marginalia", "common_crawl"}
+                | {
+                    "torch",
+                    "duckduckgo",
+                    "commons_images",
+                    "brave",
+                    "mojeek",
+                    "kagi",
+                    "marginalia",
+                    "common_crawl",
+                }
                 | ({"searxng"} if endpoint else set())
             )
             valid |= {"onion_searxng"} if onion else set()
@@ -84,6 +95,10 @@ class Settings:
             # Add the new default to an unchanged old default selection, preserving custom choices.
             if data.get("schema_version", 1) < 3 and defaults.issubset(selected):
                 selected.append("torch")
+            if data.get("schema_version", 1) < 5 and defaults.issubset(selected):
+                selected.extend(
+                    key for key in ("duckduckgo", "commons_images") if key not in selected
+                )
             return cls(
                 selected or cls().sources,
                 endpoint,

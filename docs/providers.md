@@ -4,6 +4,8 @@ Capabilities describe what this application implements, not everything the provi
 
 | Provider / ID | Purpose | Credentials | Pagination | Language / region | Index and important limits |
 | --- | --- | --- | --- | --- | --- |
+| DuckDuckGo Web / `duckduckgo` | General web discovery | None | Bounded HTML result pages | English default in this integration | Public HTML search interface; snippets only; destination sites are not fetched |
+| Wikimedia Commons Images / `commons_images` | Image discovery | None | API continuation | Query-language matching | Wikimedia Commons file results; image page, license and creator metadata are retained |
 | Brave / `brave` | Web discovery | `TRACTOR_BRAVE_API_KEY` | Up to 10 provider pages; local chunks preserve smaller budgets | Language and country hints | Independent index; plan must permit storing results; provider defaults apply when language is unknown |
 | Mojeek / `mojeek` | Web discovery | `TRACTOR_MOJEEK_API_KEY` | Absolute result offsets; conservative 10-result requests | Language and regional boosts | Independent index; enable storage eligibility only for a plan that permits persistent retention |
 | Kagi / `kagi` | Web discovery | `TRACTOR_KAGI_API_KEY` | Current v1 pages and local chunks | Region filter; no language request field in the implemented API | Aggregate; account settings can personalize results; generated answers excluded |
@@ -47,7 +49,7 @@ Duplicate results retain every discovery observation, query, provider rank, page
 
 Health stores the most recent 200 completed attempts per provider locally: success rate, median latency, error class, rate-limit responses, unique and duplicate yields, and last success time. It provides only a bounded ordering preference after the first discovery pass. It never permanently disables a provider. No health information is transmitted.
 
-## Official contracts consulted for 0.4
+## Official contracts consulted for 0.5
 
 - [Brave web search](https://api-dashboard.search.brave.com/app/documentation/web-search)
 - [Mojeek request parameters](https://www.mojeek.com/support/api/search/request_parameters.html), [response format](https://www.mojeek.com/support/api/search/json_response.html), [plans and retention](https://www.mojeek.com/services/search/web-search-api/)
@@ -55,5 +57,6 @@ Health stores the most recent 200 completed attempts per provider locally: succe
 - [Marginalia current API](https://about.marginalia-search.com/article/api/): `api2.marginalia-search.com`, `API-Key` header
 - [SearxNG search API](https://docs.searxng.org/dev/search_api.html)
 - [Common Crawl index](https://index.commoncrawl.org/), [CDX query API](https://github.com/webrecorder/pywb/wiki/CDX-Server-API)
+- [DuckDuckGo HTML search](https://html.duckduckgo.com/html/), [MediaWiki API image search](https://www.mediawiki.org/wiki/API:Search), [Wikimedia Commons image information](https://www.mediawiki.org/wiki/API:Imageinfo)
 
 Live verification on 2026-09-17: Common Crawl returned capture metadata and a saved continuation cursor. Marginalia's shared public key returned HTTP 429 and was reported as rate-limited. Brave, Mojeek and Kagi had no configured keys in the development environment: their request contracts, pagination, authentication and failures were tested with deterministic fixtures, not live paid accounts. SearxNG was fixture-tested; no user server was configured. Availability can change.
