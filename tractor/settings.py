@@ -55,8 +55,9 @@ def validate_onion_endpoint(value: str) -> str:
 @dataclass
 class Settings:
     sources: list[str] = field(
-        default_factory=lambda: [a.id for a in default_adapters()]
-        + ["duckduckgo", "commons_images", "torch"]
+        default_factory=lambda: (
+            [a.id for a in default_adapters()] + ["duckduckgo", "commons_images", "torch"]
+        )
     )
     web_endpoint: str = ""
     tor_proxy: str = ""

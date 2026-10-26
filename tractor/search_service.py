@@ -405,9 +405,7 @@ def serve(data_dir: Path, parent_pid: int | None = None):
     try:
         server = SearchService(data_dir, token, parent_pid)
     except OSError as exc:
-        if exc.errno in {errno.EADDRINUSE, 48, 10048} and _register_existing(
-            data_dir, parent_pid
-        ):
+        if exc.errno in {errno.EADDRINUSE, 48, 10048} and _register_existing(data_dir, parent_pid):
             return 0
         raise RuntimeError("Tractor search could not bind its local service port") from None
 

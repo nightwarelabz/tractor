@@ -39,9 +39,7 @@ elif sys.platform == "darwin":
             capture_output=True,
         )
     app_icon = root / "build" / "tractor.icns"
-    subprocess.run(
-        ["iconutil", "-c", "icns", str(iconset), "-o", str(app_icon)], check=True
-    )
+    subprocess.run(["iconutil", "-c", "icns", str(iconset), "-o", str(app_icon)], check=True)
     icon_args = ["--icon", str(app_icon)]
 subprocess.run(
     [

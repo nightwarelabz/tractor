@@ -59,8 +59,11 @@ class CommonsImages(SearchProvider):
 
             title = item.get("title", "Image")
             result = self.result(
-                {"title": plain_text(title), "url": original,
-                 "description": field("ImageDescription")},
+                {
+                    "title": plain_text(title),
+                    "url": original,
+                    "description": field("ImageDescription"),
+                },
                 query=query,
                 page=context.page,
                 rank=rank,

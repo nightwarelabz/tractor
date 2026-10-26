@@ -25,8 +25,15 @@ PROVIDER_IDS = tuple(a.id for a in default_adapters()) + (
 )
 PROFILES = {
     "General": {
-        "duckduckgo", "commons_images", "brave", "mojeek", "kagi", "marginalia",
-        "searxng", "wikidata", "gdelt",
+        "duckduckgo",
+        "commons_images",
+        "brave",
+        "mojeek",
+        "kagi",
+        "marginalia",
+        "searxng",
+        "wikidata",
+        "gdelt",
     },
     "Academic": {"crossref", "europe_pmc", "wikidata", "brave", "searxng"},
     "Historical": {"internet_archive", "common_crawl", "wikidata", "brave", "mojeek"},
