@@ -1,6 +1,8 @@
-# TRACTOR 0.5.0 — Browser Search
+# TRACTOR 0.5.1 — Browser Search
 
 Tractor 0.5 adds the local recursive search service used by Orc and a public in-browser results page.
+
+0.5.1 fixes a service startup race: when a previous instance's service still held the shared local port (a predecessor from another data directory cannot be joined, only outlived), a starting service failed instead of waiting for the port to free. Startup now retries binding and registering for up to 30 seconds, and the local token file's creation race is handled the same way.
 
 - DuckDuckGo provides general web result snippets. Destination websites are not crawled by the search adapter.
 - Wikimedia Commons provides image results with thumbnails, file pages, creators, and license details.
