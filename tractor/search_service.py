@@ -36,7 +36,15 @@ log = logging.getLogger("tractor.search_service")
 
 class SearchService(ThreadingHTTPServer):
     daemon_threads = True
-    allow_reuse_address = False
+    # SO_REUSEADDR forgives a dead predecessor's TIME_WAIT residue —
+    # macOS holds that residue against strict binds long after the old
+    # service is gone, which stranded relaunches even with the bind
+    # retry. It never permits a second ACTIVE listener (that is
+    # SO_REUSEPORT), so a live predecessor still blocks the bind and
+    # the register path still decides who serves. Windows is the
+    # exception: its SO_REUSEADDR semantics do allow overlapping
+    # binds, so Windows keeps strict binds and relies on the retry.
+    allow_reuse_address = os.name != "nt"
 
     def __init__(self, data_dir: Path, token: str, parent_pid: int | None):
         self.data_dir = data_dir
