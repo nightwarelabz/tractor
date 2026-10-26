@@ -12,7 +12,7 @@ from tractor.analysis.relationships import correlate
 from tractor.core.convergence import Budget
 from tractor.core.deduplication import DuplicateIndex, normalize_result
 from tractor.core.diversity import observation
-from tractor.core.models import Attempt, Edge, Investigation, QueryVariant, RetrievalTask, now
+from tractor.core.models import Attempt, Edge, Investigation, QueryVariant, RetrievalTask, new_id, now
 from tractor.core.provenance import record_discovery
 from tractor.core.query import add_variant, build_plan
 from tractor.core.scoring import rank_results
@@ -322,7 +322,12 @@ class InvestigationEngine:
         rank_results(inv)
 
     async def run(
-        self, value: str, *, resume: Investigation | None = None, previous_id: str | None = None
+        self,
+        value: str,
+        *,
+        resume: Investigation | None = None,
+        previous_id: str | None = None,
+        investigation_id: str | None = None,
     ) -> Investigation:
         if resume:
             inv = resume
@@ -351,6 +356,7 @@ class InvestigationEngine:
             inv = Investigation(
                 plan.seed,
                 plan,
+                id=investigation_id or new_id(),
                 budget=asdict(self.budget),
                 source_ids=list(self.adapters),
                 source_context={

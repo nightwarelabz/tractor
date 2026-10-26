@@ -19,6 +19,7 @@ def now() -> str:
 
 class SourceType(StrEnum):
     WEB = "WEB"
+    IMAGE = "IMAGE"
     ARCHIVE = "ARCHIVE"
     NEWS = "NEWS"
     DOCUMENT = "DOCUMENT"

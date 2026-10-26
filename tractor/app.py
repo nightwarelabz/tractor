@@ -125,6 +125,8 @@ def main() -> int:
     action.add_argument("--search", help="Run the investigation engine without the GUI")
     action.add_argument("--resume", help="Continue an investigation by its full ID")
     action.add_argument("--refresh", help="Run a fresh investigation from a saved ID")
+    action.add_argument("--serve", action="store_true", help="Serve the local web search interface")
+    parser.add_argument("--parent-pid", type=int, help=argparse.SUPPRESS)
     action.add_argument(
         "--history", nargs="?", const="", metavar="TEXT", help="Search local history"
     )
@@ -165,6 +167,10 @@ def main() -> int:
     configure_logging(args.debug)
     try:
         settings = Settings.load(args.data_dir)
+        if args.serve:
+            from tractor.search_service import serve
+
+            return serve(args.data_dir, args.parent_pid)
         if args.profile:
             settings.profile = args.profile
             settings.sources = select_profile(settings, args.profile)

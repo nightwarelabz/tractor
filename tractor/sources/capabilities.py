@@ -6,6 +6,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class ProviderCapabilities:
     web: bool = False
+    images: bool = False
     news: bool = False
     academic: bool = False
     archive: bool = False
@@ -31,6 +32,7 @@ SPECIALIZED_CAPABILITIES = {
     "gdelt": ProviderCapabilities(news=True),
     "torch": ProviderCapabilities(onion=True, pagination=True, independent_index=True),
     "onion_searxng": ProviderCapabilities(onion=True, pagination=True, languages=True),
+    "commons_images": ProviderCapabilities(images=True, pagination=True),
 }
 
 
